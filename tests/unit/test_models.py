@@ -11,7 +11,7 @@ def test_user_model(db_session: Session):
     """Test User model creation."""
     user = User(
         username="testuser",
-        password_hash="hashed_password",
+        hashed_password="hashed_password",
     )
     db_session.add(user)
     db_session.commit()
@@ -19,15 +19,15 @@ def test_user_model(db_session: Session):
 
     assert user.id is not None
     assert user.username == "testuser"
-    assert user.password_hash == "hashed_password"
-    assert user.created_at is not None
+    assert user.hashed_password == "hashed_password"
+    assert user.inserted_at is not None
     assert user.updated_at is not None
 
 
 def test_task_model(db_session: Session):
     """Test Task model creation."""
     # Create a user first
-    user = User(username="testuser", password_hash="hashed_password")
+    user = User(username="testuser", hashed_password="hashed_password")
     db_session.add(user)
     db_session.commit()
     db_session.refresh(user)
@@ -38,7 +38,7 @@ def test_task_model(db_session: Session):
         description="Test Description",
         status="todo",
         urgency="medium",
-        owner_id=user.id,
+        user_id=user.id,
     )
     db_session.add(task)
     db_session.commit()
@@ -49,14 +49,14 @@ def test_task_model(db_session: Session):
     assert task.description == "Test Description"
     assert task.status == "todo"
     assert task.urgency == "medium"
-    assert task.owner_id == user.id
-    assert task.created_at is not None
+    assert task.user_id == user.id
+    assert task.inserted_at is not None
 
 
 def test_group_model(db_session: Session):
     """Test Group model creation."""
     # Create owner
-    owner = User(username="owner", password_hash="hashed_password")
+    owner = User(username="owner", hashed_password="hashed_password")
     db_session.add(owner)
     db_session.commit()
     db_session.refresh(owner)
@@ -65,7 +65,7 @@ def test_group_model(db_session: Session):
     group = Group(
         name="Test Group",
         description="Test Description",
-        owner_id=owner.id,
+        created_by_user_id=owner.id,
     )
     db_session.add(group)
     db_session.commit()
@@ -74,14 +74,16 @@ def test_group_model(db_session: Session):
     assert group.id is not None
     assert group.name == "Test Group"
     assert group.description == "Test Description"
-    assert group.owner_id == owner.id
-    assert group.created_at is not None
+    assert group.created_by_user_id == owner.id
+    assert group.inserted_at is not None
 
 
 def test_task_relationships(db_session: Session):
     """Test Task model relationships."""
+    from todo.models.task import TaskDependency
+
     # Create owner
-    owner = User(username="owner", password_hash="hashed_password")
+    owner = User(username="owner", hashed_password="hashed_password")
     db_session.add(owner)
     db_session.commit()
     db_session.refresh(owner)
@@ -90,8 +92,8 @@ def test_task_relationships(db_session: Session):
     task1 = Task(
         title="Task 1",
         status="todo",
-        urgency="medium",
-        owner_id=owner.id,
+        urgency="normal",
+        user_id=owner.id,
     )
     db_session.add(task1)
     db_session.commit()
@@ -100,13 +102,22 @@ def test_task_relationships(db_session: Session):
     task2 = Task(
         title="Task 2",
         status="todo",
-        urgency="medium",
-        owner_id=owner.id,
+        urgency="normal",
+        user_id=owner.id,
     )
-    task2.prerequisite_tasks.append(task1)
     db_session.add(task2)
     db_session.commit()
     db_session.refresh(task2)
 
-    assert len(task2.prerequisite_tasks) == 1
-    assert task2.prerequisite_tasks[0].id == task1.id
+    # Create dependency: task2 is blocked by task1 (task1 is a prerequisite for task2)
+    dependency = TaskDependency(
+        blocked_task_id=task2.id,
+        prereq_task_id=task1.id,
+    )
+    db_session.add(dependency)
+    db_session.commit()
+    db_session.refresh(task2)
+
+    # Verify task2 is blocked by task1
+    assert len(task2.blocked_by) == 1
+    assert task2.blocked_by[0].prereq_task_id == task1.id

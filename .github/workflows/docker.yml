@@ -2,11 +2,12 @@ name: Docker Build and Push
 
 on:
   push:
-    branches: [main, master]
+    branches: ["**"]
     tags:
       - 'v*'
   pull_request:
     branches: [main, master]
+  workflow_dispatch:
 
 env:
   REGISTRY: ghcr.io
@@ -19,6 +20,7 @@ jobs:
     permissions:
       contents: read
       packages: write
+      id-token: write
 
     steps:
       - name: Checkout code
@@ -46,10 +48,11 @@ jobs:
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
             type=semver,pattern={{major}}
-            type=sha,prefix={{branch}}-
+            type=sha,prefix=sha-
             type=raw,value=latest,enable={{is_default_branch}}
 
       - name: Build and push Docker image
+        id: build
         uses: docker/build-push-action@v5
         with:
           context: .

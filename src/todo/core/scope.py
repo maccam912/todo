@@ -5,7 +5,7 @@ from dataclasses import dataclass
 from sqlalchemy import or_, select
 from sqlalchemy.orm import Session, joinedload
 
-from todo.models import Group, GroupMembership, Task, User, UserPreference
+from todo.models import Group, GroupMembership, Task, TaskDependency, User, UserPreference
 
 
 @dataclass
@@ -174,8 +174,8 @@ def get_tasks_for_scope(db: Session, scope: Scope, status: str | None = None) ->
             )
         )
         .options(
-            joinedload(Task.blocked_by).joinedload(Task.prerequisite),
-            joinedload(Task.blocks).joinedload(Task.blocked_task),
+            joinedload(Task.blocked_by).joinedload(TaskDependency.prerequisite),
+            joinedload(Task.blocks).joinedload(TaskDependency.blocked_task),
         )
     )
 
