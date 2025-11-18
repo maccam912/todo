@@ -1,4 +1,5 @@
 """Integration tests for API endpoints."""
+
 from fastapi.testclient import TestClient
 
 

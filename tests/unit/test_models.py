@@ -1,12 +1,10 @@
 """Unit tests for database models."""
-from datetime import UTC, datetime
 
-import pytest
 from sqlalchemy.orm import Session
 
-from todo.models.user import User
-from todo.models.task import Task
 from todo.models.group import Group
+from todo.models.task import Task
+from todo.models.user import User
 
 
 def test_user_model(db_session: Session):

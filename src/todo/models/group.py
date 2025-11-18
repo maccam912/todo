@@ -1,4 +1,5 @@
 """Group models for task assignment."""
+
 from datetime import UTC, datetime
 
 from sqlalchemy import CheckConstraint, ForeignKey, String, UniqueConstraint, func
@@ -42,9 +43,7 @@ class Group(Base):
         back_populates="member_group",
         cascade="all, delete-orphan",
     )
-    assigned_tasks: Mapped[list["Task"]] = relationship(
-        "Task", back_populates="assigned_group"
-    )
+    assigned_tasks: Mapped[list["Task"]] = relationship("Task", back_populates="assigned_group")
 
     def __repr__(self) -> str:
         return f"<Group(id={self.id}, name={self.name})>"
@@ -115,5 +114,7 @@ class GroupMembership(Base):
     )
 
     def __repr__(self) -> str:
-        member_type = f"user_id={self.user_id}" if self.user_id else f"group_id={self.member_group_id}"
+        member_type = (
+            f"user_id={self.user_id}" if self.user_id else f"group_id={self.member_group_id}"
+        )
         return f"<GroupMembership(id={self.id}, group_id={self.group_id}, {member_type})>"

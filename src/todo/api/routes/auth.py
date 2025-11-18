@@ -1,4 +1,5 @@
 """Authentication routes."""
+
 from fastapi import APIRouter, HTTPException, status
 
 from todo.api.deps import CurrentScope, DatabaseSession
@@ -37,7 +38,7 @@ def register(user_data: UserCreate, db: DatabaseSession):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=str(e),
-        )
+        ) from e
 
 
 @router.post("/login", response_model=TokenResponse)

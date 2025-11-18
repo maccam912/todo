@@ -1,4 +1,5 @@
 """Authentication utilities."""
+
 from datetime import UTC, datetime
 
 from fastapi import HTTPException, status
@@ -234,9 +235,7 @@ def create_scope(db: Session, user: User, load_preferences: bool = False) -> Sco
     return Scope(user=user, preference=preference)
 
 
-def update_password(
-    db: Session, user: User, current_password: str, new_password: str
-) -> None:
+def update_password(db: Session, user: User, current_password: str, new_password: str) -> None:
     """
     Update a user's password.
 

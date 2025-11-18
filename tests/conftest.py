@@ -1,6 +1,6 @@
 """Test fixtures and configuration."""
-import os
-from typing import AsyncGenerator, Generator
+
+from collections.abc import AsyncGenerator, Generator
 
 import pytest
 from fastapi.testclient import TestClient
@@ -41,11 +41,9 @@ def db_engine(test_settings):
 
 
 @pytest.fixture(scope="function")
-def db_session(db_engine) -> Generator[Session, None, None]:
+def db_session(db_engine) -> Generator[Session]:
     """Create a test database session."""
-    TestingSessionLocal = sessionmaker(
-        autocommit=False, autoflush=False, bind=db_engine
-    )
+    TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=db_engine)
     session = TestingSessionLocal()
     try:
         yield session
@@ -54,7 +52,7 @@ def db_session(db_engine) -> Generator[Session, None, None]:
 
 
 @pytest.fixture(scope="function")
-def client(db_session, test_settings) -> Generator[TestClient, None, None]:
+def client(db_session, test_settings) -> Generator[TestClient]:
     """Create a test client."""
 
     def override_get_db():
@@ -76,9 +74,7 @@ def client(db_session, test_settings) -> Generator[TestClient, None, None]:
 
 
 @pytest.fixture(scope="function")
-async def async_client(
-    db_session, test_settings
-) -> AsyncGenerator[AsyncClient, None]:
+async def async_client(db_session, test_settings) -> AsyncGenerator[AsyncClient]:
     """Create an async test client."""
 
     def override_get_db():
@@ -93,9 +89,7 @@ async def async_client(
     app.dependency_overrides[get_db] = override_get_db
     app.dependency_overrides[get_settings] = override_get_settings
 
-    async with AsyncClient(
-        transport=ASGITransport(app=app), base_url="http://test"
-    ) as ac:
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
         yield ac
 
     app.dependency_overrides.clear()

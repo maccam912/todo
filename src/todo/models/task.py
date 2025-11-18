@@ -1,4 +1,5 @@
 """Task models."""
+
 from datetime import UTC, date, datetime
 from enum import Enum
 
@@ -94,9 +95,7 @@ class Task(Base):
         foreign_keys=[assignee_id],
         back_populates="assigned_tasks",
     )
-    assigned_group: Mapped["Group | None"] = relationship(
-        "Group", back_populates="assigned_tasks"
-    )
+    assigned_group: Mapped["Group | None"] = relationship("Group", back_populates="assigned_tasks")
 
     # Dependencies - tasks that this task blocks (this task is a prerequisite for them)
     blocks: Mapped[list["TaskDependency"]] = relationship(

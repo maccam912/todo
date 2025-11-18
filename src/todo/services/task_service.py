@@ -1,11 +1,12 @@
 """Task service for CRUD operations and business logic."""
+
 from datetime import UTC, date, datetime
 from typing import Any
 
 from dateutil.relativedelta import relativedelta
 from fastapi import HTTPException, status
 from sqlalchemy import select
-from sqlalchemy.orm import Session, joinedload
+from sqlalchemy.orm import Session
 
 from todo.core.scope import Scope, can_access_task, can_modify_task, get_tasks_for_scope
 from todo.models import Task, TaskDependency, TaskRecurrence, TaskStatus
@@ -67,9 +68,7 @@ def create_task(
         urgency=urgency,
         due_date=due_date,
         deferred_until=deferred_until,
-        recurrence=recurrence.value
-        if isinstance(recurrence, TaskRecurrence)
-        else recurrence,
+        recurrence=recurrence.value if isinstance(recurrence, TaskRecurrence) else recurrence,
         assignee_id=assignee_id,
         assigned_group_id=assigned_group_id,
     )
@@ -87,9 +86,7 @@ def create_task(
                     detail=f"Prerequisite task {prereq_id} not found",
                 )
 
-            dependency = TaskDependency(
-                blocked_task_id=task.id, prereq_task_id=prereq_id
-            )
+            dependency = TaskDependency(blocked_task_id=task.id, prereq_task_id=prereq_id)
             db.add(dependency)
 
     db.commit()
@@ -199,9 +196,7 @@ def update_task(
                     detail=f"Prerequisite task {prereq_id} not found",
                 )
 
-            dependency = TaskDependency(
-                blocked_task_id=task.id, prereq_task_id=prereq_id
-            )
+            dependency = TaskDependency(blocked_task_id=task.id, prereq_task_id=prereq_id)
             db.add(dependency)
 
     # Update other fields
@@ -348,15 +343,11 @@ def _create_recurring_task(db: Session, original_task: Task) -> Task:
     db.flush()
 
     # Copy prerequisite dependencies
-    stmt = select(TaskDependency).where(
-        TaskDependency.blocked_task_id == original_task.id
-    )
+    stmt = select(TaskDependency).where(TaskDependency.blocked_task_id == original_task.id)
     original_deps = db.execute(stmt).scalars().all()
 
     for dep in original_deps:
-        new_dep = TaskDependency(
-            blocked_task_id=new_task.id, prereq_task_id=dep.prereq_task_id
-        )
+        new_dep = TaskDependency(blocked_task_id=new_task.id, prereq_task_id=dep.prereq_task_id)
         db.add(new_dep)
 
     return new_task

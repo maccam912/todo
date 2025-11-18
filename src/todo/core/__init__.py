@@ -1,4 +1,5 @@
 """Core application modules."""
+
 from todo.core.auth import (
     authenticate_user,
     create_api_token,

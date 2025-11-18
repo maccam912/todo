@@ -1,4 +1,5 @@
 """Pydantic schemas for request/response validation."""
+
 from todo.schemas.group import (
     GroupCreate,
     GroupListResponse,

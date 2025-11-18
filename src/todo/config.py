@@ -1,4 +1,5 @@
 """Application configuration using Pydantic settings."""
+
 from functools import lru_cache
 from typing import Literal
 
@@ -70,26 +71,20 @@ class Settings(BaseSettings):
         default="https://openrouter.ai/api/v1", description="LLM API base URL"
     )
     llm_api_key: str = Field(default="", description="LLM API key")
-    llm_model: str = Field(
-        default="anthropic/claude-3.5-sonnet", description="LLM model to use"
-    )
+    llm_model: str = Field(default="anthropic/claude-3.5-sonnet", description="LLM model to use")
     llm_timeout: int = Field(default=600, description="LLM request timeout in seconds")
     llm_max_retries: int = Field(default=3, description="Maximum LLM request retries")
     llm_temperature: float = Field(default=0.7, description="LLM temperature")
 
     # OpenRouter specific
-    openrouter_app_name: str = Field(
-        default="SmartTodo", description="App name for OpenRouter"
-    )
+    openrouter_app_name: str = Field(default="SmartTodo", description="App name for OpenRouter")
     openrouter_site_url: str = Field(
         default="https://github.com/yourusername/smart-todo",
         description="Site URL for OpenRouter",
     )
 
     # State Machine
-    max_conversation_rounds: int = Field(
-        default=20, description="Max conversation rounds with LLM"
-    )
+    max_conversation_rounds: int = Field(default=20, description="Max conversation rounds with LLM")
     max_command_errors: int = Field(
         default=3, description="Max command errors before session termination"
     )
@@ -121,9 +116,7 @@ class Settings(BaseSettings):
 
     # Phoenix-specific (legacy compatibility)
     phoenix_api_key: str = Field(default="", description="Phoenix API key")
-    phoenix_collector_endpoint: str = Field(
-        default="", description="Phoenix collector endpoint"
-    )
+    phoenix_collector_endpoint: str = Field(default="", description="Phoenix collector endpoint")
 
     def get_otlp_headers(self) -> dict[str, str]:
         """Parse OTLP headers from comma-separated string."""
@@ -147,9 +140,7 @@ class Settings(BaseSettings):
         if not self.otel_resource_attributes:
             return {}
         return dict(
-            item.split("=", 1)
-            for item in self.otel_resource_attributes.split(",")
-            if "=" in item
+            item.split("=", 1) for item in self.otel_resource_attributes.split(",") if "=" in item
         )
 
 

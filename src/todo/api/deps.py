@@ -1,4 +1,5 @@
 """FastAPI dependencies for authentication and database."""
+
 from typing import Annotated
 
 from fastapi import Depends, HTTPException, status

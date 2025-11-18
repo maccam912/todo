@@ -1,15 +1,19 @@
 """User Pydantic schemas."""
+
 from datetime import datetime
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field
 
 
 class UserBase(BaseModel):
     """Base user schema."""
 
     username: str = Field(
-        ..., min_length=3, max_length=32, pattern=r"^[a-zA-Z0-9_.-]+$",
-        description="Username (3-32 chars, alphanumeric + _ . -)"
+        ...,
+        min_length=3,
+        max_length=32,
+        pattern=r"^[a-zA-Z0-9_.-]+$",
+        description="Username (3-32 chars, alphanumeric + _ . -)",
     )
 
 

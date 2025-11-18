@@ -1,4 +1,5 @@
 """Database setup and session management."""
+
 from collections.abc import Generator
 from typing import Any
 
@@ -47,7 +48,7 @@ def init_db(settings: Settings | None = None) -> None:
     SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
-def get_db() -> Generator[Session, None, None]:
+def get_db() -> Generator[Session]:
     """Dependency to get database session."""
     db = SessionLocal()
     try:

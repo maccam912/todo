@@ -1,4 +1,5 @@
 """Security utilities for password hashing and token generation."""
+
 import base64
 import hashlib
 import secrets
@@ -62,18 +63,14 @@ def generate_session_token() -> bytes:
     return generate_random_token(32)
 
 
-def should_rotate_session_token(
-    token_created_at: datetime, settings: Settings
-) -> bool:
+def should_rotate_session_token(token_created_at: datetime, settings: Settings) -> bool:
     """Check if a session token should be rotated."""
     rotation_threshold = timedelta(days=settings.session_token_rotation_days)
     age = datetime.now(UTC) - token_created_at.replace(tzinfo=UTC)
     return age > rotation_threshold
 
 
-def is_session_token_expired(
-    token_created_at: datetime, settings: Settings
-) -> bool:
+def is_session_token_expired(token_created_at: datetime, settings: Settings) -> bool:
     """Check if a session token has expired."""
     expiration_threshold = timedelta(days=settings.session_token_expire_days)
     age = datetime.now(UTC) - token_created_at.replace(tzinfo=UTC)

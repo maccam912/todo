@@ -1,4 +1,5 @@
 """Database models."""
+
 from todo.models.group import Group, GroupMembership
 from todo.models.task import Task, TaskDependency, TaskRecurrence, TaskStatus, TaskUrgency
 from todo.models.token import UserAccessToken, UserPreference, UserToken

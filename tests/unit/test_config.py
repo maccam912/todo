@@ -1,5 +1,4 @@
 """Unit tests for configuration."""
-import os
 
 from todo.config import Settings
 

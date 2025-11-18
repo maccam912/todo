@@ -1,4 +1,5 @@
 """Group routes."""
+
 from fastapi import APIRouter, status
 
 from todo.api.deps import CurrentScope, DatabaseSession
@@ -153,7 +154,9 @@ def get_group_members(
     return GroupMembersResponse(data=members)
 
 
-@router.post("/{group_id}/members", response_model=GroupMemberResponse, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/{group_id}/members", response_model=GroupMemberResponse, status_code=status.HTTP_201_CREATED
+)
 def add_member(
     group_id: int,
     member_data: GroupMemberAdd,

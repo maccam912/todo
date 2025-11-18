@@ -1,5 +1,5 @@
 """State machine for LLM-driven task management."""
-import json
+
 import logging
 import uuid
 from dataclasses import dataclass, field
@@ -9,7 +9,6 @@ from typing import Any, Literal
 from sqlalchemy.orm import Session
 
 from todo.core.scope import Scope, get_tasks_for_scope
-from todo.models import TaskRecurrence, TaskStatus, TaskUrgency
 from todo.services.task_service import (
     complete_task,
     create_task,
@@ -37,7 +36,10 @@ class PlanNote:
     plan: str
 
 
-State = Literal["awaiting_command", "completed"] | tuple[Literal["editing_task"], tuple[Literal["existing", "pending"], int]]
+State = (
+    Literal["awaiting_command", "completed"]
+    | tuple[Literal["editing_task"], tuple[Literal["existing", "pending"], int]]
+)
 
 
 class StateMachine:
@@ -54,9 +56,7 @@ class StateMachine:
         self.error_count: int = 0
         self.session_id: str = str(uuid.uuid4())
 
-    def handle_command(
-        self, command: str, params: dict[str, Any]
-    ) -> tuple[bool, dict[str, Any]]:
+    def handle_command(self, command: str, params: dict[str, Any]) -> tuple[bool, dict[str, Any]]:
         """
         Handle a command from the LLM.
 
@@ -68,9 +68,7 @@ class StateMachine:
             Tuple of (success, response_dict)
         """
         if self.state == "completed":
-            return False, self.build_response(
-                "Session already completed", error=True
-            )
+            return False, self.build_response("Session already completed", error=True)
 
         # Route command to appropriate handler
         handlers = {
@@ -87,9 +85,7 @@ class StateMachine:
 
         handler = handlers.get(command)
         if not handler:
-            return False, self.build_response(
-                f"Unknown command: {command}", error=True
-            )
+            return False, self.build_response(f"Unknown command: {command}", error=True)
 
         try:
             return handler(params)
@@ -124,37 +120,25 @@ class StateMachine:
             target_id = int(target_id)
             target: tuple[Literal["existing", "pending"], int] = (target_type, target_id)  # type: ignore
         except (ValueError, AttributeError):
-            return False, self.build_response(
-                f"Invalid target format: {target_str}", error=True
-            )
+            return False, self.build_response(f"Invalid target format: {target_str}", error=True)
 
         if target_type not in ["existing", "pending"]:
-            return False, self.build_response(
-                f"Invalid target type: {target_type}", error=True
-            )
+            return False, self.build_response(f"Invalid target type: {target_type}", error=True)
 
         # Validate target exists
         if target_type == "existing":
             task = get_task_by_id(self.db, self.scope, target_id)
             if not task:
-                return False, self.build_response(
-                    f"Task {target_id} not found", error=True
-                )
+                return False, self.build_response(f"Task {target_id} not found", error=True)
             self.edit_context = {"task_id": target_id, "task": task}
         else:  # pending
             # Find pending operation
             pending_op = next(
-                (
-                    op
-                    for op in self.pending_ops
-                    if op.target == target
-                ),
+                (op for op in self.pending_ops if op.target == target),
                 None,
             )
             if not pending_op:
-                return False, self.build_response(
-                    f"Pending task {target_id} not found", error=True
-                )
+                return False, self.build_response(f"Pending task {target_id} not found", error=True)
             self.edit_context = {"pending_ref": target_id, "operation": pending_op}
 
         self.state = ("editing_task", target)
@@ -168,9 +152,7 @@ class StateMachine:
         # Stage the operation
         ref = self.next_pending_ref
         target: tuple[Literal["pending"], int] = ("pending", ref)
-        self.pending_ops.append(
-            PendingOperation(type="create_task", target=target, attrs=params)
-        )
+        self.pending_ops.append(PendingOperation(type="create_task", target=target, attrs=params))
         self.next_pending_ref += 1
 
         return True, self.build_response(
@@ -178,9 +160,7 @@ class StateMachine:
             echo={"pending_ref": ref, "title": params.get("title")},
         )
 
-    def _handle_update_task_fields(
-        self, params: dict[str, Any]
-    ) -> tuple[bool, dict[str, Any]]:
+    def _handle_update_task_fields(self, params: dict[str, Any]) -> tuple[bool, dict[str, Any]]:
         """Handle update_task_fields command."""
         if not isinstance(self.state, tuple) or self.state[0] != "editing_task":
             return False, self.build_response(
@@ -190,13 +170,9 @@ class StateMachine:
         target = self.state[1]
 
         # Stage the operation
-        self.pending_ops.append(
-            PendingOperation(type="update_task", target=target, attrs=params)
-        )
+        self.pending_ops.append(PendingOperation(type="update_task", target=target, attrs=params))
 
-        return True, self.build_response(
-            f"Update staged for {target[0]}:{target[1]}"
-        )
+        return True, self.build_response(f"Update staged for {target[0]}:{target[1]}")
 
     def _handle_complete_task(self, params: dict[str, Any]) -> tuple[bool, dict[str, Any]]:
         """Handle complete_task command."""
@@ -208,13 +184,9 @@ class StateMachine:
         target = self.state[1]
 
         # Stage the operation
-        self.pending_ops.append(
-            PendingOperation(type="complete_task", target=target, attrs={})
-        )
+        self.pending_ops.append(PendingOperation(type="complete_task", target=target, attrs={}))
 
-        return True, self.build_response(
-            f"Completion staged for {target[0]}:{target[1]}"
-        )
+        return True, self.build_response(f"Completion staged for {target[0]}:{target[1]}")
 
     def _handle_delete_task(self, params: dict[str, Any]) -> tuple[bool, dict[str, Any]]:
         """Handle delete_task command."""
@@ -226,20 +198,14 @@ class StateMachine:
         target = self.state[1]
 
         # Stage the operation
-        self.pending_ops.append(
-            PendingOperation(type="delete_task", target=target, attrs={})
-        )
+        self.pending_ops.append(PendingOperation(type="delete_task", target=target, attrs={}))
 
-        return True, self.build_response(
-            f"Deletion staged for {target[0]}:{target[1]}"
-        )
+        return True, self.build_response(f"Deletion staged for {target[0]}:{target[1]}")
 
     def _handle_exit_editing(self, params: dict[str, Any]) -> tuple[bool, dict[str, Any]]:
         """Handle exit_editing command."""
         if not isinstance(self.state, tuple) or self.state[0] != "editing_task":
-            return False, self.build_response(
-                "Not in editing mode", error=True
-            )
+            return False, self.build_response("Not in editing mode", error=True)
 
         self.state = "awaiting_command"
         self.edit_context = None
@@ -256,9 +222,7 @@ class StateMachine:
 
         return True, self.build_response("All operations discarded")
 
-    def _handle_complete_session(
-        self, params: dict[str, Any]
-    ) -> tuple[bool, dict[str, Any]]:
+    def _handle_complete_session(self, params: dict[str, Any]) -> tuple[bool, dict[str, Any]]:
         """Handle complete_session command."""
         # Commit all pending operations
         try:
@@ -269,9 +233,7 @@ class StateMachine:
             )
         except Exception as e:
             logger.error(f"Error committing operations: {e}", exc_info=True)
-            return False, self.build_response(
-                f"Failed to commit operations: {e}", error=True
-            )
+            return False, self.build_response(f"Failed to commit operations: {e}", error=True)
 
     def commit_operations(self) -> dict[str, Any]:
         """

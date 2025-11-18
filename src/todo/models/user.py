@@ -1,4 +1,5 @@
 """User model."""
+
 from datetime import UTC, datetime
 
 from sqlalchemy import String, func

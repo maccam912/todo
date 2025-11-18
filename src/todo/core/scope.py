@@ -1,4 +1,5 @@
 """Scope-based authorization system."""
+
 from dataclasses import dataclass
 
 from sqlalchemy import or_, select
@@ -55,9 +56,7 @@ def get_user_group_ids(db: Session, user_id: int, visited: set[int] | None = Non
         for parent_membership in parent_memberships:
             if parent_membership.group_id not in visited:
                 # Recursively get parent groups
-                parent_ids = _get_parent_group_ids(
-                    db, parent_membership.group_id, visited.copy()
-                )
+                parent_ids = _get_parent_group_ids(db, parent_membership.group_id, visited.copy())
                 group_ids.update(parent_ids)
 
     return group_ids
@@ -92,9 +91,7 @@ def _get_parent_group_ids(db: Session, group_id: int, visited: set[int]) -> set[
     return parent_ids
 
 
-def check_circular_group_reference(
-    db: Session, parent_group_id: int, child_group_id: int
-) -> bool:
+def check_circular_group_reference(db: Session, parent_group_id: int, child_group_id: int) -> bool:
     """
     Check if adding child_group to parent_group would create a circular reference.
 
@@ -141,16 +138,12 @@ def _get_all_member_groups(db: Session, group_id: int, visited: set[int]) -> set
 
     for membership in memberships:
         if membership.member_group_id and membership.member_group_id not in visited:
-            member_ids.update(
-                _get_all_member_groups(db, membership.member_group_id, visited)
-            )
+            member_ids.update(_get_all_member_groups(db, membership.member_group_id, visited))
 
     return member_ids
 
 
-def get_tasks_for_scope(
-    db: Session, scope: Scope, status: str | None = None
-) -> list[Task]:
+def get_tasks_for_scope(db: Session, scope: Scope, status: str | None = None) -> list[Task]:
     """
     Get all tasks visible to the current user based on scope.
 

@@ -1,4 +1,5 @@
 """Task Pydantic schemas."""
+
 from datetime import date, datetime
 
 from pydantic import BaseModel, Field, field_validator

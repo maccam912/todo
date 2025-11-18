@@ -1,4 +1,5 @@
 """LLM service for interacting with OpenRouter API."""
+
 import json
 import logging
 from typing import Any
@@ -101,9 +102,7 @@ class LLMService:
                     )
 
                 # Update span with output
-                span.set_attribute(
-                    "llm.output_messages", json.dumps(output_messages)
-                )
+                span.set_attribute("llm.output_messages", json.dumps(output_messages))
                 span.set_attribute(
                     "output.value",
                     json.dumps(output_messages[0]) if output_messages else "",
@@ -120,7 +119,7 @@ class LLMService:
                 logger.error(f"LLM request failed: {e}")
                 span.set_attribute("error", True)
                 span.set_attribute("error.message", str(e))
-                raise Exception(f"LLM request failed: {e}")
+                raise Exception(f"LLM request failed: {e}") from e
 
     async def close(self):
         """Close the HTTP client."""

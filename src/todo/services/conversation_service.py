@@ -1,4 +1,5 @@
 """Conversation service for managing LLM-driven task processing."""
+
 import logging
 from typing import Any
 
@@ -65,7 +66,9 @@ class ConversationService:
 
             # Conversation loop
             for round_num in range(self.settings.max_conversation_rounds):
-                logger.info(f"Conversation round {round_num + 1}/{self.settings.max_conversation_rounds}")
+                logger.info(
+                    f"Conversation round {round_num + 1}/{self.settings.max_conversation_rounds}"
+                )
 
                 # Call LLM
                 try:
@@ -80,7 +83,7 @@ class ConversationService:
                     logger.error(f"LLM request failed: {e}")
                     error_message = f"LLM request failed: {str(e)}"
                     set_span_attributes(span, output_value=error_message, error=True)
-                    raise Exception(error_message)
+                    raise Exception(error_message) from e
 
                 # Extract function call
                 function_call = extract_function_call(response)
@@ -168,13 +171,13 @@ class ConversationService:
 
         return f"""User request: {text}
 
-Available commands: {', '.join(state['available_commands'])}
+Available commands: {", ".join(state["available_commands"])}
 
 Open tasks (max 20):
-{self._format_tasks(state['open_tasks'])}
+{self._format_tasks(state["open_tasks"])}
 
-Current state: {state['state']}
-Pending operations: {len(state['pending_operations'])}
+Current state: {state["state"]}
+Pending operations: {len(state["pending_operations"])}
 """
 
     def _format_tasks(self, tasks: list[dict[str, Any]]) -> str:

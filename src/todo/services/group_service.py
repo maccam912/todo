@@ -1,4 +1,5 @@
 """Group service for managing groups and memberships."""
+
 from datetime import UTC, datetime
 from typing import Any
 

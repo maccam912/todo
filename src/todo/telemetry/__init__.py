@@ -1,4 +1,5 @@
 """Telemetry module for OpenTelemetry instrumentation."""
+
 from todo.telemetry.instrumentation import (
     OpenInferenceSpanKind,
     TelemetryManager,

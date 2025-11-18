@@ -1,4 +1,5 @@
 """Token models for authentication."""
+
 from datetime import UTC, datetime
 
 from sqlalchemy import ForeignKey, LargeBinary, String, func
@@ -55,7 +56,9 @@ class UserAccessToken(Base):
     user: Mapped["User"] = relationship("User", back_populates="access_tokens")
 
     def __repr__(self) -> str:
-        return f"<UserAccessToken(id={self.id}, user_id={self.user_id}, prefix={self.token_prefix})>"
+        return (
+            f"<UserAccessToken(id={self.id}, user_id={self.user_id}, prefix={self.token_prefix})>"
+        )
 
 
 class UserPreference(Base):

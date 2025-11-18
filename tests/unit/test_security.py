@@ -1,7 +1,6 @@
 """Unit tests for security utilities."""
-from datetime import UTC, datetime, timedelta
 
-import pytest
+from datetime import UTC, datetime, timedelta
 
 from todo.config import Settings
 from todo.core.security import (
