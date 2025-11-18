@@ -4,11 +4,11 @@ from logging.config import fileConfig
 from sqlalchemy import engine_from_config, pool
 
 from alembic import context
-from app.config import get_settings
-from app.database import Base
+from todo.config import get_settings
+from todo.database import Base
 
 # Import all models to ensure they're registered with Base.metadata
-from app.models import (  # noqa: F401
+from todo.models import (  # noqa: F401
     Group,
     GroupMembership,
     Task,
