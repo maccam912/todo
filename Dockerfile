@@ -25,6 +25,9 @@ RUN uv sync --frozen --no-dev
 # Copy application code
 COPY . .
 
+# Install the package itself
+RUN uv pip install --no-deps -e .
+
 # Runtime stage
 FROM python:3.13-slim
 
