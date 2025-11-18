@@ -3,7 +3,6 @@
 from datetime import UTC, date, datetime
 from typing import Any
 
-from dateutil.relativedelta import relativedelta
 from fastapi import HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session, joinedload

@@ -44,7 +44,7 @@ def setup_logging(settings: Settings) -> None:
 
     # Create console handler
     console_handler = logging.StreamHandler(sys.stdout)
-    
+
     if settings.environment == "production":
         console_handler.setFormatter(JsonFormatter())
     else:
