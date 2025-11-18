@@ -16,6 +16,8 @@ WORKDIR /app
 # Copy dependency files
 COPY pyproject.toml ./
 COPY .python-version ./
+COPY uv.lock ./
+COPY README.md ./
 
 # Install dependencies
 RUN uv sync --frozen --no-dev
