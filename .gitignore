@@ -14,3 +14,20 @@ wheels/
 coverage.xml
 htmlcov/
 .pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# Environment variables
+.env
+
+# IDE settings
+.idea/
+.vscode/
+
+# Logs
+*.log
+
+# Database
+*.sqlite
+*.db
+

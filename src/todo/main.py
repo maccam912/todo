@@ -10,18 +10,16 @@ from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
 
 from todo.api.routes import auth, groups, tasks
 from todo.config import get_settings
+from todo.core.logging import setup_logging
 from todo.database import init_db
 from todo.telemetry import TelemetryManager
 
-# Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='{"timestamp": "%(asctime)s", "level": "%(levelname)s", "name": "%(name)s", "message": "%(message)s"}',
-)
-logger = logging.getLogger(__name__)
-
 # Get settings
 settings = get_settings()
+
+# Configure logging
+setup_logging(settings)
+logger = logging.getLogger(__name__)
 
 # Initialize telemetry
 telemetry_manager = TelemetryManager(settings)

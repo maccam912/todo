@@ -6,8 +6,9 @@ from typing import Any
 from dateutil.relativedelta import relativedelta
 from fastapi import HTTPException, status
 from sqlalchemy import select
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
+from todo.core.recurrence import calculate_next_due_date
 from todo.core.scope import Scope, can_access_task, can_modify_task, get_tasks_for_scope
 from todo.models import Task, TaskDependency, TaskRecurrence, TaskStatus
 
@@ -108,8 +109,15 @@ def get_task_by_id(db: Session, scope: Scope, task_id: int) -> Task | None:
     Returns:
         Task if found and accessible, None otherwise
     """
-    stmt = select(Task).where(Task.id == task_id)
-    task = db.execute(stmt).scalar_one_or_none()
+    stmt = (
+        select(Task)
+        .where(Task.id == task_id)
+        .options(
+            joinedload(Task.blocked_by).joinedload(TaskDependency.prerequisite),
+            joinedload(Task.blocks).joinedload(TaskDependency.blocked_task),
+        )
+    )
+    task = db.execute(stmt).unique().scalar_one_or_none()
 
     if not task:
         return None
@@ -317,14 +325,7 @@ def _create_recurring_task(db: Session, original_task: Task) -> Task:
     # Calculate new due date
     new_due_date = None
     if original_task.due_date:
-        if original_task.recurrence == TaskRecurrence.DAILY.value:
-            new_due_date = original_task.due_date + relativedelta(days=1)
-        elif original_task.recurrence == TaskRecurrence.WEEKLY.value:
-            new_due_date = original_task.due_date + relativedelta(weeks=1)
-        elif original_task.recurrence == TaskRecurrence.MONTHLY.value:
-            new_due_date = original_task.due_date + relativedelta(months=1)
-        elif original_task.recurrence == TaskRecurrence.YEARLY.value:
-            new_due_date = original_task.due_date + relativedelta(years=1)
+        new_due_date = calculate_next_due_date(original_task.due_date, original_task.recurrence)
 
     # Create new task
     new_task = Task(
@@ -364,27 +365,9 @@ def _load_task_relationships(db: Session, task: Task) -> Task:
     Returns:
         Task with loaded relationships
     """
-    # Refresh task to ensure we have latest data
-    db.refresh(task)
-
-    # Manually load prerequisites
-    stmt = (
-        select(Task)
-        .join(TaskDependency, TaskDependency.prereq_task_id == Task.id)
-        .where(TaskDependency.blocked_task_id == task.id)
-    )
-    prerequisites = db.execute(stmt).scalars().all()
-
-    # Manually load dependents
-    stmt = (
-        select(Task)
-        .join(TaskDependency, TaskDependency.blocked_task_id == Task.id)
-        .where(TaskDependency.prereq_task_id == task.id)
-    )
-    dependents = db.execute(stmt).scalars().all()
-
-    # Set attributes for serialization
-    task.prerequisites = prerequisites  # type: ignore
-    task.dependents = dependents  # type: ignore
+    # Map relationships to what schema expects
+    # These will trigger lazy loads if not already eager loaded
+    task.prerequisites = [dep.prerequisite for dep in task.blocked_by]  # type: ignore
+    task.dependents = [dep.blocked_task for dep in task.blocks]  # type: ignore
 
     return task

@@ -1,6 +1,6 @@
 """Group routes."""
 
-from fastapi import APIRouter, status
+from fastapi import APIRouter, HTTPException, status
 
 from todo.api.deps import CurrentScope, DatabaseSession
 from todo.schemas.group import (
@@ -27,7 +27,10 @@ router = APIRouter(prefix="/groups", tags=["groups"])
 
 
 @router.get("", response_model=GroupListResponse)
-def list_all_groups(db: DatabaseSession):
+def list_all_groups(
+    scope: CurrentScope,
+    db: DatabaseSession,
+):
     """
     List all groups.
 
@@ -70,6 +73,7 @@ def create_new_group(
 @router.get("/{group_id}", response_model=GroupResponse)
 def get_group(
     group_id: int,
+    scope: CurrentScope,
     db: DatabaseSession,
 ):
     """
@@ -82,8 +86,6 @@ def get_group(
     Returns:
         Group
     """
-    from fastapi import HTTPException
-
     group = get_group_by_id(db, group_id)
     if not group:
         raise HTTPException(
@@ -138,6 +140,7 @@ def delete_existing_group(
 @router.get("/{group_id}/members", response_model=GroupMembersResponse)
 def get_group_members(
     group_id: int,
+    scope: CurrentScope,
     db: DatabaseSession,
 ):
     """
