@@ -23,7 +23,7 @@ def test_health_endpoint(client: TestClient):
 def test_register_user(client: TestClient, test_user_data):
     """Test user registration."""
     response = client.post("/api/auth/register", json=test_user_data)
-    assert response.status_code == 200
+    assert response.status_code == 201
     data = response.json()
     assert data["username"] == test_user_data["username"]
     assert "id" in data
@@ -34,7 +34,7 @@ def test_register_duplicate_user(client: TestClient, test_user_data):
     """Test registering a duplicate user."""
     # Register first time
     response = client.post("/api/auth/register", json=test_user_data)
-    assert response.status_code == 200
+    assert response.status_code == 201
 
     # Try to register again with same username
     response = client.post("/api/auth/register", json=test_user_data)

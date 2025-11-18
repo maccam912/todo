@@ -110,6 +110,6 @@ def test_task_data():
     return {
         "title": "Test Task",
         "description": "This is a test task",
-        "urgency": "medium",
+        "urgency": "normal",
         "status": "todo",
     }
