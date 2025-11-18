@@ -52,6 +52,7 @@ coverage.xml
 
 # Documentation
 *.md
+!README.md
 docs/
 
 # CI/CD
