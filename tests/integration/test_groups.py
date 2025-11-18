@@ -24,7 +24,7 @@ def test_create_group(authenticated_client: TestClient):
         "description": "A test group",
     }
     response = authenticated_client.post("/api/groups", json=group_data)
-    assert response.status_code == 200
+    assert response.status_code == 201
     data = response.json()
     assert data["name"] == group_data["name"]
     assert data["description"] == group_data["description"]
@@ -41,8 +41,10 @@ def test_list_groups(authenticated_client: TestClient):
     response = authenticated_client.get("/api/groups")
     assert response.status_code == 200
     data = response.json()
-    assert isinstance(data, list)
-    assert len(data) >= 1
+    assert isinstance(data, dict)
+    assert "data" in data
+    assert isinstance(data["data"], list)
+    assert len(data["data"]) >= 1
 
 
 def test_get_group(authenticated_client: TestClient):
@@ -84,7 +86,7 @@ def test_delete_group(authenticated_client: TestClient):
 
     # Delete the group
     response = authenticated_client.delete(f"/api/groups/{group_id}")
-    assert response.status_code == 200
+    assert response.status_code == 204
 
     # Verify it's deleted
     response = authenticated_client.get(f"/api/groups/{group_id}")

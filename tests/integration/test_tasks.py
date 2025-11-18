@@ -20,7 +20,7 @@ def authenticated_client(client: TestClient, test_user_data):
 def test_create_task(authenticated_client: TestClient, test_task_data):
     """Test creating a task."""
     response = authenticated_client.post("/api/tasks", json=test_task_data)
-    assert response.status_code == 200
+    assert response.status_code == 201
     data = response.json()
     assert data["title"] == test_task_data["title"]
     assert data["description"] == test_task_data["description"]
@@ -38,9 +38,11 @@ def test_list_tasks(authenticated_client: TestClient, test_task_data):
     response = authenticated_client.get("/api/tasks")
     assert response.status_code == 200
     data = response.json()
-    assert isinstance(data, list)
-    assert len(data) >= 1
-    assert data[0]["title"] == test_task_data["title"]
+    assert isinstance(data, dict)
+    assert "data" in data
+    assert isinstance(data["data"], list)
+    assert len(data["data"]) >= 1
+    assert data["data"][0]["title"] == test_task_data["title"]
 
 
 def test_get_task(authenticated_client: TestClient, test_task_data):
@@ -93,7 +95,7 @@ def test_delete_task(authenticated_client: TestClient, test_task_data):
 
     # Delete the task
     response = authenticated_client.delete(f"/api/tasks/{task_id}")
-    assert response.status_code == 200
+    assert response.status_code == 204
 
     # Verify it's deleted
     response = authenticated_client.get(f"/api/tasks/{task_id}")
