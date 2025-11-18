@@ -3,10 +3,10 @@
 from datetime import UTC, datetime
 
 from sqlalchemy import String, func
-from sqlalchemy.dialects.postgresql import CITEXT
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from todo.database import Base
+from todo.types import CITEXT
 
 
 class User(Base):

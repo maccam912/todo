@@ -3,7 +3,7 @@
 from functools import lru_cache
 from typing import Literal
 
-from pydantic import Field, PostgresDsn
+from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -30,9 +30,9 @@ class Settings(BaseSettings):
     reload: bool = Field(default=False, description="Auto-reload on code changes")
 
     # Database
-    database_url: PostgresDsn = Field(
+    database_url: str = Field(
         default="postgresql://postgres:postgres@localhost:5432/smart_todo",
-        description="PostgreSQL connection URL",
+        description="Database connection URL (PostgreSQL or SQLite)",
     )
     db_pool_size: int = Field(default=10, description="Database connection pool size")
     db_max_overflow: int = Field(default=20, description="Database max overflow connections")
