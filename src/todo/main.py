@@ -3,9 +3,12 @@
 import logging
 from contextlib import asynccontextmanager
 
+from pathlib import Path
+
 from fastapi import FastAPI, Request, status
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, FileResponse
+from fastapi.staticfiles import StaticFiles
 from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
 
 from todo.api.routes import auth, groups, tasks
@@ -50,6 +53,10 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+# Mount static files
+BASE_DIR = Path(__file__).resolve().parent
+app.mount("/static", StaticFiles(directory=BASE_DIR / "static"), name="static")
+
 # Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
@@ -73,7 +80,7 @@ app.include_router(groups.router, prefix="/api")
 @app.get("/")
 async def root():
     """Root endpoint."""
-    return {"message": "SmartTodo API", "version": "0.1.0"}
+    return FileResponse(BASE_DIR / "static" / "index.html")
 
 
 @app.get("/health")
