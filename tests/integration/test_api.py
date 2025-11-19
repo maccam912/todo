@@ -7,9 +7,7 @@ def test_root_endpoint(client: TestClient):
     """Test the root endpoint."""
     response = client.get("/")
     assert response.status_code == 200
-    data = response.json()
-    assert data["message"] == "SmartTodo API"
-    assert "version" in data
+    assert "text/html" in response.headers["content-type"]
 
 
 def test_health_endpoint(client: TestClient):
